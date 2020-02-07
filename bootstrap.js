@@ -1,4 +1,4 @@
-const { App } = require('./src/server/app');
+const { App } = require('./src/app');
 
 console.log('Server starting up from boostrapper...');
 
