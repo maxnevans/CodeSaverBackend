@@ -1,18 +1,21 @@
 {
-  "name": "CodeSaverBackend",
+  "name": "code-saver-backend",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
   "dependencies": {
     "express": "^4.17.1",
+    "multer": "^1.4.2",
     "mysql": "^2.18.1"
   },
   "devDependencies": {
     "@types/express": "^4.17.2",
+    "@types/multer": "^1.4.2",
     "@types/mysql": "^2.15.8"
   },
   "scripts": {
-    "start": "node bootstrap.js"
+    "start": "node bootstrap.js",
+    "watch": "nodemon bootstrap.js --inspect"
   },
   "author": "",
   "license": "ISC"
