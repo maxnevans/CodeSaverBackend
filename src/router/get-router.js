@@ -3,33 +3,37 @@ const express = require('express');
 class GetRouter {
     constructor(connection) {
         this._router = express.Router();
+        this._connection = connection;
 
-        this._setupRouter(this._router, connection);
+        this._setupRoutes(this._router);
     }
 
-    _setupRouter(router, connection) {
-        router.get('/list', (req, res, next) => {
-            connection.query('SELECT id, created_time FROM `code_samples` ORDER BY created_time DESC', function (error, results, fields) {
-                if (error)
-                    return next(error);
+    _setupRoutes(router) {
+        router.get('/list', this._getListRouteHandler.bind(this));
+        router.get('/code/:sampleId', this._getCodeSampleRouteHandler.bind(this));
+    }
 
-                const codeSamples = [];
+    _getListRouteHandler(req, res, next) {
+        this._connection.query('SELECT id, created_time FROM `code_samples` ORDER BY created_time DESC', function (error, results, fields) {
+            if (error)
+                return next(error);
 
-                console.log(results);
+            const codeSamples = [];
 
-                res.json(results);
-            });
+            console.log(results);
+
+            res.json(results);
         });
-        
-        router.get('/code/:sampleId', (req, res, next) => {
-            connection.query('SELECT * FROM `code_samples` WHERE id = ?',[req.params.sampleId] , function (error, results, fields) {
-                if (error)
-                    return next(error);
+    }
 
-                console.log(results);
+    _getCodeSampleRouteHandler(req, res, next) {
+        connection.query('SELECT * FROM `code_samples` WHERE id = ?',[req.params.sampleId] , function (error, results, fields) {
+            if (error)
+                return next(error);
 
-                res.json('this is a code sample');
-            });
+            console.log(results);
+
+            res.json('this is a code sample');
         });
     }
 
@@ -37,7 +41,5 @@ class GetRouter {
         return this._router;
     }
 }
-
-
 
 module.exports = GetRouter;
