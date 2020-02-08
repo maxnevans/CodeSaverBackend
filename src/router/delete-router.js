@@ -16,10 +16,8 @@ class DeleteRouter {
         this._connection.query('update code_samples set deleted = true where id = ?', [req.params.sampleId], (error, results, fields) => {
             if (error)
                 return next(error);
-
-            console.log(results);
-
-            res.json('code sample deleted');
+                
+            res.status(200).end();
         });
     }
 

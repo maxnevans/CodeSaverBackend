@@ -18,22 +18,18 @@ class GetRouter {
             if (error)
                 return next(error);
 
-            const codeSamples = [];
-
-            console.log(results);
-
-            res.json(results);
+            res.status(200).json(results);
         });
     }
 
     _getCodeSampleRouteHandler(req, res, next) {
-        connection.query('SELECT * FROM `code_samples` WHERE id = ?',[req.params.sampleId] , function (error, results, fields) {
+        connection.query('SELECT * FROM `code_samples` WHERE id = ?', [req.params.sampleId], function (error, results, fields) {
             if (error)
                 return next(error);
 
-            console.log(results);
-
-            res.json('this is a code sample');
+            res.status(200).json({
+                codeSample: results[0]
+            });
         });
     }
 

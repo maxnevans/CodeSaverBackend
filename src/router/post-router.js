@@ -17,25 +17,25 @@ class PostRouter {
 
     _uploadCodeSampleHandler(req, res, next) {
         this._connection.query('insert into code_samples set name = ?, author_id = ?, code = ?', 
-            ['hardcoded code name', 1, req.file.buffer.toString()], (error, results, fields) => {
+            [req.body['code-name'], 1, req.file.buffer.toString()], (error, results, fields) => {
             if (error)
                 return next(error);
 
-            console.log('file uploaded');
-
-            res.json('file has been uploaded');
+            res.status(200).json({
+                codeSampleId: results.insertId
+            });
         });
     }
 
     _createCodeSampleHandler(req, res, next) {
         this._connection.query('insert into code_samples set name = ?, author_id = ?, code = ?', 
-            ['hardcoded code name', 1, 'this is hardcoded content'], (error, results, fields) => {
+            [req.body['code-name'], 1, 'this is hardcoded content'], (error, results, fields) => {
             if (error)
                 return next(error);
 
-            console.log('file created');
-
-            res.json('file has been created');
+            res.status(200).json({
+                codeSampleId: results.insertId
+            });
         });
     }
 
