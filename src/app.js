@@ -3,7 +3,7 @@ const express = require('express');
 const GetRouter = require('./router/get-router');
 const PostRouter = require('./router/post-router');
 const DeleteRouter = require('./router/delete-router');
-
+const PutRouter = require('./router/put-router');
 
 class App {
     constructor(port) {
@@ -24,6 +24,7 @@ class App {
         this._app.use('/api', (new GetRouter(this._connection)).getRouter());
         this._app.use('/api', (new PostRouter(this._connection)).getRouter());
         this._app.use('/api', (new DeleteRouter(this._connection)).getRouter());
+        this._app.use('/api', (new PutRouter(this._connection)).getRouter());
     }
 
     start() {
