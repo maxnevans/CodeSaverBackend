@@ -23,13 +23,11 @@ class GetRouter {
     }
 
     _getCodeSampleRouteHandler(req, res, next) {
-        connection.query('SELECT * FROM `code_samples` WHERE id = ?', [req.params.sampleId], function (error, results, fields) {
+        this._connection.query('SELECT * FROM `code_samples` WHERE id = ?', [req.params.sampleId], function (error, results, fields) {
             if (error)
                 return next(error);
 
-            res.status(200).json({
-                codeSample: results[0]
-            });
+            res.status(200).json(results[0]);
         });
     }
 
