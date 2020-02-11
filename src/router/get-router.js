@@ -14,7 +14,7 @@ class GetRouter {
     }
 
     _getListRouteHandler(req, res, next) {
-        this._connection.query('SELECT id, created_time FROM `code_samples` ORDER BY created_time DESC', function (error, results, fields) {
+        this._connection.query('SELECT id, name, created_time FROM code_samples WHERE deleted = false ORDER BY created_time DESC', function (error, results, fields) {
             if (error)
                 return next(error);
 

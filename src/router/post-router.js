@@ -11,6 +11,8 @@ class PostRouter {
     }
 
     _setupRoutes(router) {
+        router.post('*', this._upload.single());
+        
         router.post('/code/upload', this._upload.single('code-file'), this._uploadCodeSampleHandler.bind(this));
         router.post('/code/create', this._createCodeSampleHandler.bind(this));
     }
@@ -29,7 +31,7 @@ class PostRouter {
 
     _createCodeSampleHandler(req, res, next) {
         this._connection.query('insert into code_samples set name = ?, author_id = ?, code = ?', 
-            [req.body['code-name'], 1, 'this is hardcoded content'], (error, results, fields) => {
+            [req.body['code-name'], 1, req.body['code-sample']], (error, results, fields) => {
             if (error)
                 return next(error);
 
