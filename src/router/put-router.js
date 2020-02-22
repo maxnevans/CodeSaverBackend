@@ -1,17 +1,20 @@
 const express = require('express');
 const multer = require('multer');
+const AuthMiddleware = require('./common/auth-middleware');
 
 class PutRouter {
     constructor(connection) {
         this._connection = connection;
         this._router = express.Router();
         this._upload = multer();
+        this._auth = new AuthMiddleware(connection);
 
         this._setupRoutes(this._router);
     }
 
     _setupRoutes(router) {
-        
+        router.put('/logout', ...this._auth.logout());
+        router.put('/auth', ...this._auth.authorize());
         router.put('/code/:sampleId', this._upload.single(), this._editCodeSampleHandler.bind(this));
         router.put('/code/upload/:sampleId', this._upload.single('code-file'), this._uploadCodeSampleHandler.bind(this));
     }
