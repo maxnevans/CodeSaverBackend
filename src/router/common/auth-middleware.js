@@ -55,7 +55,7 @@ class AuthMiddleware {
         try {
             user = jwt.verify(req.cookies.token, AuthMiddleware.secret);
         } catch(error) {
-            return res.status(422).json({reason: 'invalid token'});
+            return res.status(401).json({reason: 'invalid token'});
         }
         
         req.currentUser = user;
@@ -80,7 +80,7 @@ class AuthMiddleware {
 
         this._connection.query('INSERT INTO users SET login = ?, password = ?;',
             [login, password], (error, results, fields) => {
-            if (error.code === 'ER_DUP_ENTRY')
+            if (error && error.code === 'ER_DUP_ENTRY')
                 return res.status(406).json({reason: `user {${login}} already exists`});
 
             if (error)
@@ -89,7 +89,7 @@ class AuthMiddleware {
             if (results.insertId == null)
                 return res.status(500).end();
 
-            return res.status(201).json({
+            return res.status(200).json({
                 id: results.insertId,
                 login,
                 password

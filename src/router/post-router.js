@@ -13,10 +13,22 @@ class PostRouter {
     }
 
     _setupRoutes(router) {
-        router.post('/register', ...this._auth.registerUser());
-        router.put('/auth', ...this._auth.authorize());
-        router.post('/code/upload', this._upload.single('code-file'), this._uploadCodeSampleHandler.bind(this));
-        router.post('/code/create', this._upload.single(), this._createCodeSampleHandler.bind(this));
+        router.post('/register', 
+            ...this._auth.registerUser()
+        );
+        router.put('/auth', 
+            ...this._auth.authorize()
+        );
+        router.post('/code/upload', 
+            ...this._auth.verifyToken(),
+            this._upload.single('code-file'),
+            this._uploadCodeSampleHandler.bind(this)
+        );
+        router.post('/code/create', 
+            ...this._auth.verifyToken(),
+            this._upload.single(), 
+            this._createCodeSampleHandler.bind(this)
+        );
     }
 
     _uploadCodeSampleHandler(req, res, next) {        

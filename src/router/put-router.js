@@ -13,10 +13,22 @@ class PutRouter {
     }
 
     _setupRoutes(router) {
-        router.put('/logout', ...this._auth.logout());
-        router.put('/auth', ...this._auth.authorize());
-        router.put('/code/:sampleId', this._upload.single(), this._editCodeSampleHandler.bind(this));
-        router.put('/code/upload/:sampleId', this._upload.single('code-file'), this._uploadCodeSampleHandler.bind(this));
+        router.put('/logout', 
+            ...this._auth.logout()
+        );
+        router.put('/auth', 
+            ...this._auth.authorize()
+        );
+        router.put('/code/:sampleId', 
+            ...this._auth.verifyToken(),
+            this._upload.single(), 
+            this._editCodeSampleHandler.bind(this)
+        );
+        router.put('/code/upload/:sampleId', 
+            ...this._auth.verifyToken(),
+            this._upload.single('code-file'), 
+            this._uploadCodeSampleHandler.bind(this)
+        );
     }
 
     _editCodeSampleHandler(req, res, next) {
