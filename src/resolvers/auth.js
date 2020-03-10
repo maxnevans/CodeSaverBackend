@@ -1,6 +1,15 @@
 const Auth = require('../middleware/auth');
 
 module.exports = {
+    authInfo: async (args, ctx) => {
+        if (ctx.req.token == null)
+            return null;
+
+        return {
+            id: ctx.req.token.id,
+            token: Auth.getCurrentToken(ctx)
+        };
+    },
     account: async (args, ctx) => {
         if (ctx.req.token == null)
             return null;

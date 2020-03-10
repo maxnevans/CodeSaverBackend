@@ -2,6 +2,7 @@ const { buildSchema } = require('graphql');
 
 module.exports = buildSchema(`
     type Query {
+        authInfo: Auth
         account: User
         code(id: Int): CodeSample
         codeList: [CodeSample]

@@ -3,12 +3,13 @@ const jwt = require('jsonwebtoken');
 const SECRET = 'this is a secret';
 
 module.exports = {
-    parseToken: (req, res, next) => {
+    parseTokenMiddleware: (req, res, next) => {
         if (req.cookies == null)
             throw new Error('cookies is undefined! please parse req.cookies first');
     
         try {
             req.token = jwt.verify(req.cookies.token, SECRET);
+            req.token.token = req.cookies.token;
         } catch(error) {
             req.token = null;
         }
@@ -24,5 +25,16 @@ module.exports = {
             jwt.sign(user, SECRET),
             {httpOnly: true}
         ];
+    },
+    getCurrentToken(context) {
+        return context.req.cookies.token;
+    },
+    isValidToken(userId, token) {
+        try {
+            const user = jwt.verify(token, SECRET);
+            return user.id == userId;
+        } catch(error) {
+            return false;
+        }
     }
 };
