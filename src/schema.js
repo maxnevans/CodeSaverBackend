@@ -9,7 +9,7 @@ module.exports = buildSchema(`
     }
 
     type Mutation {
-        register(login: String, password: String): Auth
+        register(login: String, password: String): User
         authorize(login: String, password: String): Auth
         unauthorize: Boolean
         createCode(name: String, code: String): Int

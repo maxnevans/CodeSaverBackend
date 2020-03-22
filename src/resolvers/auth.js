@@ -22,25 +22,25 @@ module.exports = {
 
             return {...results[0]};
         } catch(error) {
+            console.log(error);
             return null;
         }
     },
     register: async (args, ctx) => {
         try {
-            const results = await ctx.db.query('INSER INTO users SET login = ?, password = ?;', [args.login, args.password]);
+            const results = await ctx.db.query('INSERT INTO users SET login = ?, password = ?;', [args.login, args.password]);
             const user = {
                 id: results.insertId,
                 login: args.login,
-                password: args.password
+                password: args.password,
+                registeredTime: new Date().toISOString()
             };
 
             ctx.res.cookie(...Auth.createCookieToken(user));
 
-            return {
-                id: results.insertId,
-                token: Auth.createToken(user)
-            }; 
+            return user; 
         } catch (error) {
+            console.log(error);
             return null;
         }    
     },
@@ -50,6 +50,7 @@ module.exports = {
             results = await ctx.db.query('SELECT * FROM users WHERE login = ? AND password = ? LIMIT 1;',
                 [args.login, args.password]);
         } catch(error) {
+            console.log(error);
             return null;
         }
 
