@@ -3,47 +3,66 @@ const expressGraphQL = require('express-graphql');
 const cookieParser = require('cookie-parser');
 const http = require('http');
 const socketio = require('socket.io');
+const cors = require("cors");
+const fs = require("fs");
+const url = require("url");
 
 const Auth = require('./middleware/auth');
-const uploadMiddleware = require('./middleware/upload');
+const codeUploadMiddleware = require('./middleware/code-upload');
+const userUploadMiddleware = require('./middleware/user-upload');
+const userDownloadMiddleware = require('./middleware/user-download');
 const socketMiddleware = require('./middleware/socket');
 
 const SocketManager = require('./socket-manager.js')
 
 const connection = require('./db');
 
-const schema = require('./schema');
+const { buildSchema } = require('graphql');
 const resolvers = require('./resolvers/root');
+const config = require("./config");
+
 
 class App {
-    constructor(port) {
-        this._port = port || 8080;
-        this._connection = connection;
-        this._app = express();
-        this._server = http.Server(this._app);
-        this._io = socketio(this._server);
-        this._socketManager = new SocketManager(this._io);
+    #host;
+    #port;
+    #connection;
+    #app;
+    #server;
+    #io;
+    #socketManager;
+
+    constructor(host, port) {
+        this.#port = port || config.port;
+        this.#host = host || config.host;
+        this.#connection = connection;
+        this.#app = express();
+        this.#app.disable("x-powered-by");
+        this.#app.use(cors());
+        this.#server = http.Server(this.#app);
+        this.#io = socketio(this.#server);
+        this.#socketManager = new SocketManager(this.#io);
         this.setupRoutes();
-        this._app.use(express.static('../client/dist'));
     }
 
     setupRoutes() {
-        this._app.use(cookieParser());
-        this._app.use(Auth.parseTokenMiddleware);
-        this._app.use(socketMiddleware);
-        this._app.use('/graphql', (req, res, next) => expressGraphQL({
-            schema,
+        this.#app.use(cookieParser());
+        this.#app.use(Auth.parseTokenMiddleware);
+        this.#app.use(socketMiddleware);
+        this.#app.use("/graphql", (req, res, next) => expressGraphQL({
+            schema: buildSchema(fs.readFileSync(config.schemaFileName).toString("utf-8")),
             rootValue: resolvers,
             graphiql: true,
-            context: { req, res, db: this._connection, socketManager: this._socketManager }
+            context: { req, res, db: this.#connection, socketManager: this.#socketManager }
         })(req, res, next));
-        this._app.use('/api/code/upload/:sampleId?', uploadMiddleware);
+        this.#app.use("/code/upload", codeUploadMiddleware());
+        this.#app.use("/user/upload", userUploadMiddleware(config.userFilesDir, url.resolve(this.#host, config.userFilesUrl)));
+        this.#app.use(config.userFilesUrl, [userDownloadMiddleware(), express.static(config.userFilesDir)]);
+        this.#app.use("/", express.static(config.staticFilesDir));
     }
 
     start() {
-        this._connection.connect();
-
-        this._server.listen(this._port, () => {
+        this.#connection.connect();
+        this.#server.listen(this.#port, this.#host, () => {
             console.log('Server is listening on port 8080!');
         });
     }

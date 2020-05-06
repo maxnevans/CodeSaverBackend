@@ -1,70 +1,39 @@
 const Auth = require('../middleware/auth');
 
+const files = require("./files");
+
 module.exports = {
-    authInfo: async (args, ctx) => {
-        if (ctx.req.token == null)
-            return null;
-
-        return {
-            id: ctx.req.token.id,
-            token: Auth.getCurrentToken(ctx)
-        };
-    },
-    account: async (args, ctx) => {
-        if (ctx.req.token == null)
-            return null;
-
-        try {
-            const results = await ctx.db.query('SELECT * FROM users WHERE id = ?;', [ctx.req.token.id]);
-
-            if (results.length != 1)
-                return null;
-
-            return {...results[0]};
-        } catch(error) {
-            console.log(error);
-            return null;
-        }
-    },
     register: async (args, ctx) => {
-        try {
-            const results = await ctx.db.query('INSERT INTO users SET login = ?, password = ?;', [args.login, args.password]);
-            const user = {
-                id: results.insertId,
-                login: args.login,
-                password: args.password,
-                registeredTime: new Date().toISOString()
-            };
+        const userId = (await ctx.db.query('INSERT INTO users SET login = ?, password = ?;', [args.login, args.password]))?.insertId;
 
-            ctx.res.cookie(...Auth.createCookieToken(user));
+        const user = (await ctx.db.query('SELECT * FROM users WHERE id = ?;', [userId]))?.[0];
 
-            return user; 
-        } catch (error) {
-            console.log(error);
+        if (user == null)
             return null;
-        }    
+
+            
+        ctx.res.cookie(...Auth.createCookieToken({
+            id: user.id,
+            login: user.login,
+        }));
+
+        const avatars = await Promise.all((JSON.parse(user.avatars) ?? []).map(avatar => files.file({id: avatar}, ctx)));
+
+        return {...user, avatars};
     },
     authorize: async (args, ctx) => {
-        let results = null;
-        try {
-            results = await ctx.db.query('SELECT * FROM users WHERE login = ? AND password = ? LIMIT 1;',
-                [args.login, args.password]);
-        } catch(error) {
-            console.log(error);
-            return null;
-        }
-
-        if (results.length != 1)
+        const user = (await ctx.db.query('SELECT * FROM users WHERE login = ? AND password = ?;', [args.login, args.password]))?.[0];
+        if (user == null)
             return null;
 
-        const user = {...results[0]};
-
-        ctx.res.cookie(...Auth.createCookieToken(user));
-
-        return {
+        ctx.res.cookie(...Auth.createCookieToken({
             id: user.id,
-            token: Auth.createToken(user)
-        };
+            login: user.login
+        }));
+
+        const avatars = await Promise.all((JSON.parse(user.avatars) ?? []).map(avatar => files.file({id: avatar}, ctx)));
+
+        return {...user, avatars};
     },
     unauthorize: (args, ctx) => {
         if (ctx.req.token == null)
@@ -74,4 +43,26 @@ module.exports = {
 
         return true;
     },
+    editPassword: async (args, ctx) => {
+        if (ctx.req.token == null)
+            return false;
+
+        const results = await ctx.db.query('UPDATE users SET password = ? WHERE id = ? LIMIT 1;', [args.password, ctx.req.token.id]);
+
+        if (results.affectedRows != 1)
+            return false;
+
+        return true;
+    },
+    fetchPassword: async (args, ctx) => {
+        if (ctx.req.token == null)
+            return null;
+
+        const results = await ctx.db.query('SELECT password FROM users WHERE id = ? LIMIT 1;', [ctx.req.token.id]);
+
+        if (results.length != 1)
+            return null;
+
+        return results[0].password;
+    } 
 };

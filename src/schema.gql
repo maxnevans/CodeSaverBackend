@@ -1,0 +1,129 @@
+type Query {
+    # auth.js
+    fetchPassword: String
+    
+    # user.js
+    user(id: Int): User
+
+    # code.js
+    code(id: Int!): CodeSample
+    codeList(data: CodeListInput): [CodeSample]
+    codeHistory(id: Int!, skip: Int, first: Int): [CodeSampleHistoryFrame]
+    codeMods(id: Int!): CodeSampleMods
+
+    # files.js
+    file(id: Int): File
+}
+
+type Mutation {
+    # auth.js
+    register(login: String!, password: String!): User
+    authorize(login: String!, password: String!): User
+    unauthorize: Boolean
+    editPassword(password: String!): Boolean
+
+    # code.js
+    createCode(name: String!, code: String!, mods: CodeSampleModsInput): CodeSample
+    editCode(id: Int!, name: String, code: String, mods: CodeSampleModsInput): CodeSample
+    deleteCode(id: Int!): Boolean
+    setCodeMods(id: Int!, mods: CodeSampleModsInput!): CodeSampleMods
+
+    # user.js
+    setUserAvatars(id: Int!): Boolean
+    unsetUserAvatars(id: Int!): Boolean
+    editUser(data: EditUserInput): User
+}
+
+enum SortType {
+    ASC
+    DESC
+}
+
+input CodeListInput {
+    #filter: CodeSampleFilterFields
+    #filterValue: Int | String | User | Boolean
+    sort: CodeSampleSortFields
+    sortType: SortType
+    skip: Int
+    first: Int
+}
+
+type CodeSample {
+    id: Int
+    name: String
+    code: String
+    editedTime: String
+    createdTime: String
+    author: User
+    mods: CodeSampleMods
+}
+
+type CodeSampleMods {
+    isReadPrivate: Boolean
+    isWritePrivate: Boolean
+}
+
+input CodeSampleModsInput {
+    isReadPrivate: Boolean
+    isWritePrivate: Boolean
+}
+
+enum CodeSampleFilterFields {
+    ID
+    NAME
+    CODE_LENGTH
+    EDITED_TIME
+    CREATED_TIME
+    AUTHOR
+    IS_READ_PRIVATE
+    IS_WRITE_PRIVATE
+}
+
+enum CodeSampleSortFields {
+    ID
+    NAME
+    CODE_LENGTH
+    EDITED_TIME
+    CREATED_TIME
+    AUTHOR
+    IS_READ_PRIVATE
+    IS_WRITE_PRIVATE
+}
+
+type CodeSampleHistoryFrame {
+    user: User
+    time: String
+    type: CodeSampleHistoryFrameType
+}
+
+enum CodeSampleHistoryFrameType {
+    EDIT,
+    CREATE,
+    DELETE
+}
+
+type User {
+    id: Int
+    name: String
+    secondName: String
+    login: String
+    registeredTime: String
+    avatars: [Image]
+}
+
+input EditUserInput {
+    name: String
+    secondName: String
+    login: String
+    avatars: [Int!]
+}
+
+interface File {
+    id: Int
+    url: String
+}
+
+type Image implements File {
+    id: Int
+    url: String
+}
