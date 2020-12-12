@@ -1,5 +1,5 @@
 const express = require('express');
-const expressGraphQL = require('express-graphql');
+const { graphqlHTTP } = require('express-graphql');
 const cookieParser = require('cookie-parser');
 const http = require('http');
 const socketio = require('socket.io');
@@ -48,7 +48,7 @@ class App {
         this.#app.use(cookieParser());
         this.#app.use(Auth.parseTokenMiddleware);
         this.#app.use(socketMiddleware);
-        this.#app.use("/graphql", (req, res, next) => expressGraphQL({
+        this.#app.use("/graphql", (req, res, next) => graphqlHTTP({
             schema: buildSchema(fs.readFileSync(config.schemaFileName).toString("utf-8")),
             rootValue: resolvers,
             graphiql: true,

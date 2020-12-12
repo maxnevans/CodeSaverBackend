@@ -4,7 +4,7 @@ module.exports = {
     schemaFileName: path.resolve(__dirname, "schema.gql"),
     userFilesUrl: "/files",
     userFilesDir: "./user",
-    staticFilesDir: "../client/dist",
+    staticFilesDir: "../front/dist",
     host: "localhost",
     port: 8080,
     db: {
