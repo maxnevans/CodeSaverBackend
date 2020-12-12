@@ -172,13 +172,18 @@ async function createCode(args, ctx) {
     if (codeId == null)
         return null;
 
+    const mods = await setCodeMods({id: codeId, mods: args.mods}, ctx);
+
+    if (mods == null)
+        return null;
+
     const code = {
         id: codeId,
         name: args.name,
         code: args.code,
         createdTime: new Date().toISOString(),
         editedTime: null,
-        mods : await codeMods({id: codeId}, ctx),
+        mods : mods,
         author: await user.user({id: ctx.req.token.id}, ctx)
     };
 
