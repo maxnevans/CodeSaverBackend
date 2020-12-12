@@ -201,8 +201,8 @@ async function editCode(args, ctx) {
 
     const updateValues = {};
 
-    args.name && (updateValues.name = args.name);
-    args.code && (updateValues.code = args.code);
+    args.name != null && (updateValues.name = args.name);
+    args.code != null && (updateValues.code = args.code);
     
     const codeId = args.id;
 

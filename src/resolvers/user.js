@@ -22,9 +22,9 @@ module.exports = {
 
         const updateValues = {};
 
-        args.data.name && (updateValues.name = args.data.name);
-        args.data.secondName && (updateValues.secondName = args.data.secondName);
-        args.data.login && (updateValues.login = args.data.login);
+        args.data.name != null && (updateValues.name = args.data.name);
+        args.data.secondName != null && (updateValues.secondName = args.data.secondName);
+        args.data.login == null && (updateValues.login = args.data.login);
         args.data.avatars !== undefined && (updateValues.avatars = JSON.stringify(args.data.avatars));
 
         if (Object.getOwnPropertyNames(updateValues).length == 0)
