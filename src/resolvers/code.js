@@ -213,11 +213,8 @@ async function editCode(args, ctx) {
 
     if (Object.getOwnPropertyNames(updateValues).length != 0) {
         args.editedTime = new Date();
-        const values = Object.getOwnPropertyNames(updateValues).map(key => `${key} = '${updateValues[key]}'`).join(", ");
-
-        const success = (await ctx.db.query(`UPDATE codeSamples SET ${values} ` +
-            "WHERE id = ? AND isDeleted = false LIMIT 1;", 
-            [codeId]))?.affectedRows == 1;
+        const values = Object.getOwnPropertyNames(updateValues).map(key => `${key} = '${updateValues[key].replaceAll("'", "''")}'`).join(", ");
+        const success = (await ctx.db.query(`UPDATE codeSamples SET ${values} WHERE id = ${codeId} AND isDeleted = false LIMIT 1;`))?.affectedRows == 1;
 
         if (!success)
             return null;
